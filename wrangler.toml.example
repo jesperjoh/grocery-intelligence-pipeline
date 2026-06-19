@@ -1,0 +1,48 @@
+name            = "grocery-intelligence-pipeline"
+main            = "src/workers/match-engine.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# ── D1 Database (SQLite on the Edge) ──────────────────────────
+[[d1_databases]]
+binding       = "DB"
+database_name = "grocery-pipeline-db"
+database_id   = "YOUR_D1_DATABASE_ID"     # wrangler d1 create grocery-pipeline-db
+
+# ── KV (Session storage / caching) ───────────────────────────
+[[kv_namespaces]]
+binding = "SESSIONS"
+id      = "YOUR_KV_NAMESPACE_ID"          # wrangler kv namespace create PIPELINE_SESSIONS
+
+# ── Environment variables (non-secret) ───────────────────────
+[vars]
+ENVIRONMENT     = "production"
+CF_ACCOUNT_ID   = "YOUR_CLOUDFLARE_ACCOUNT_ID"
+
+# ── Vectorize (ingredient embedding search) ───────────────────
+[[vectorize]]
+binding    = "VECTORIZE"
+index_name = "ingredient-index"
+
+# ── Vectorize (cross-store product equivalence) ───────────────
+[[vectorize]]
+binding    = "PRODUCT_VECTORS"
+index_name = "product-index"
+
+# ── Secrets — set with `wrangler secret put <KEY>` ────────────
+# SALLING_API_KEY     – Salling Group catalogue API (Bilka/Føtex/Netto)
+# SALLING_STORE_ID    – Store ID for Bilka
+# FOETEX_STORE_ID     – Store ID for Føtex
+# NETTO_STORE_ID      – Store ID for Netto
+# ANTHROPIC_API_KEY   – Claude API for AI-assisted matching and review
+
+# ── Scheduled triggers ────────────────────────────────────────
+[triggers]
+crons = [
+  "0 6 * * *",   # Daily 06:00 UTC — price sync, catalogue import, match-rule run
+  "0 5 1 * *",   # Monthly 1st 05:00 UTC — EAN harmonisation across stores
+]
+
+# ── Local dev ─────────────────────────────────────────────────
+[dev]
+port = 8787

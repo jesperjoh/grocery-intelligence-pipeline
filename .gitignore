@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Local database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment & secrets — NEVER commit these
+.env
+.env.*
+wrangler.toml
+
+# Wrangler build output
+.wrangler/
+dist/
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Editor directories
+.vscode/
+.idea/
+*.suo
+*.user
