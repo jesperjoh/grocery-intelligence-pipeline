@@ -1,7 +1,7 @@
 /**
  * match-engine.js
  *
- * Cloudflare Worker — deterministic ingredient–product matching.
+ * Cloudflare Worker - deterministic ingredient–product matching.
  *
  * Problem: Danish supermarket catalogues are structurally noisy.
  * "Yoghurt" returns strawberry smoothies. "Tun" returns tuna salad.
@@ -13,7 +13,7 @@
  * and route ambiguous cases to a Human-in-the-Loop review queue.
  *
  * Cloudflare bindings expected in `env`:
- *   env.DB   — D1 (SQLite) database
+ *   env.DB   - D1 (SQLite) database
  *
  * No real API keys are present in this file.
  * Deploy secrets via:  wrangler secret put <KEY>
@@ -33,7 +33,7 @@ function ruleWords(s) {
  *
  * mode = "word"   (default)
  *   Matches a whole word OR a compound-word suffix.
- *   Danish nouns are formed by compounding — the head noun always comes
+ *   Danish nouns are formed by compounding - the head noun always comes
  *   last, so "ketchup" correctly matches "tomatketchup", while "tun" does
  *   NOT match "tunsalat" (which is a prepared dish, not raw tuna).
  *   Short tokens (< 4 chars) are only matched as whole words, with one
@@ -63,7 +63,7 @@ function ruleTokenMatches(name, token, mode) {
  * a canonical ingredient using the active ruleset in `ingredient_match_rules`.
  *
  * Tier classification:
- *   Tier 1 — high confidence, written immediately to `canonical_ingredient`
+ *   Tier 1 - high confidence, written immediately to `canonical_ingredient`
  *             Conditions: token hit + at least one of:
  *               • product category is in rule's allowed category set
  *               • ≥ 3 distinct stores vote for the same taxonomy node (cross-store consensus)
@@ -73,7 +73,7 @@ function ruleTokenMatches(name, token, mode) {
  *               • prepared-product mismatch (røget/kogt/grillet/paneret vs. raw ingredient)
  *               • compound-word mismatch  (e.g. "jordbæryoghurt" cannot match "jordbær")
  *
- *   Tier 2 — possible match, routed to `ai_match_queue` for human review
+ *   Tier 2 - possible match, routed to `ai_match_queue` for human review
  *             Token hit, but one or more tier-1 guards failed.
  *             Only written when options.queueTier2 = true.
  *
@@ -131,14 +131,14 @@ async function applyMatchRules(env, { limit = 2000, store = null, dryRun = false
   // We look at products that are ALREADY confirmed (via manual links or a
   // previous canonical_ingredient write) and derive three signals:
   //
-  //   deptConsensus  — if ≥ 3 confirmed products are in the same department AND
+  //   deptConsensus  - if ≥ 3 confirmed products are in the same department AND
   //                    that department covers ≥ 60 % of all confirmed products,
   //                    a candidate from a different department is demoted to tier 2.
   //
-  //   coldChainSet   — if ≥ 2 confirmed products have storage_temp_max ≤ 5 °C,
+  //   coldChainSet   - if ≥ 2 confirmed products have storage_temp_max ≤ 5 °C,
   //                    an ambient candidate (temp > 10 °C) is demoted to tier 2.
   //
-  //   crossStoreTax  — taxonomy node that ≥ 3 distinct stores agree on for this
+  //   crossStoreTax  - taxonomy node that ≥ 3 distinct stores agree on for this
   //                    canonical. Used as the cross-store tier-1 gate.
 
   const canonicals   = [...new Set(rules.map(r => r.canonical))];
@@ -245,12 +245,12 @@ async function applyMatchRules(env, { limit = 2000, store = null, dryRun = false
 
   // ── Disqualifier patterns ──────────────────────────────────────────────────
 
-  // "Prepared product" — if the product name signals cooking/processing and
+  // "Prepared product" - if the product name signals cooking/processing and
   // the rule's canonical does not, demote to tier 2.
   // A raw ingredient rule should not match "røget laks" or "panerede kyllingestrimler".
   const PREPARED_RE = /\b(røget|kogt|stegt|grillet|tilberedt|ovnklar|sous[\s-]?vide|paneret|pulled|sprængt|lufttørret)\b/i;
 
-  // "Compound ingredient" — the ingredient is only a component in this product.
+  // "Compound ingredient" - the ingredient is only a component in this product.
   // Examples: jordbæryoghurt contains jordbær but IS NOT jordbær.
   //           sardiner i olie contains olie but IS NOT olie.
   // Exception: if the canonical itself contains the compound word
@@ -316,7 +316,7 @@ async function applyMatchRules(env, { limit = 2000, store = null, dryRun = false
     const best     = hits[0];
     const sameRank = hits.filter(h => h.tier === best.tier && h.r.token.length === best.r.token.length);
 
-    // Ambiguous: multiple distinct canonicals at the same confidence — skip.
+    // Ambiguous: multiple distinct canonicals at the same confidence - skip.
     if (new Set(sameRank.map(h => h.r.canonical)).size > 1) { ambiguous++; continue; }
 
     // Skip permanently dismissed pairs
@@ -361,7 +361,7 @@ async function applyMatchRules(env, { limit = 2000, store = null, dryRun = false
 
 // ── Cloudflare Worker entry point ─────────────────────────────────────────────
 export default {
-  // HTTP handler — exposes the engine as a REST endpoint for manual runs
+  // HTTP handler - exposes the engine as a REST endpoint for manual runs
   async fetch(request, env) {
     const url = new URL(request.url);
 
@@ -379,7 +379,7 @@ export default {
     return new Response("grocery-intelligence-pipeline", { status: 200 });
   },
 
-  // Scheduled handler — runs daily via cron (see wrangler.toml.example)
+  // Scheduled handler - runs daily via cron (see wrangler.toml.example)
   async scheduled(event, env, ctx) {
     ctx.waitUntil(applyMatchRules(env, { limit: 2000 }));
   },
