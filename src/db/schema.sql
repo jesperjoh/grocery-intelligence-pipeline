@@ -47,8 +47,14 @@ CREATE TABLE IF NOT EXISTS products_catalog (
   ean                 TEXT,
   name                TEXT NOT NULL,
   brand               TEXT,
-  category            TEXT,              -- store's own category label
-  department          TEXT,              -- store's own department label
+  category            TEXT,              -- store's own leaf category label
+  department          TEXT,              -- store's own top-level department label
+  category_path       TEXT,              -- full hierarchy string, root → leaf, " / "-separated
+                                         -- Bilka: "Kolonial / Krydderier / Paprika pulver"
+                                         -- Rema/Føtex: null (flat category only)
+  ingredient_type     TEXT,              -- culinary classification via inferProductType()
+                                         -- "krydderi"|"grøntsag"|"protein"|"mejeri"|"korn"|
+                                         -- "fedt"|"nødder"|"sauce"|"frugt"|"andet" | null
   price               REAL,
   unit_price          REAL,
   price_unit          TEXT,              -- "kg" | "L" | "stk"
@@ -65,10 +71,11 @@ CREATE TABLE IF NOT EXISTS products_catalog (
   UNIQUE(store, object_id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_pc_ean            ON products_catalog(ean)        WHERE ean IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_pc_ean            ON products_catalog(ean)             WHERE ean IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_pc_store          ON products_catalog(store);
 CREATE INDEX IF NOT EXISTS idx_pc_canonical      ON products_catalog(canonical_ingredient) WHERE canonical_ingredient IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_pc_unmatched      ON products_catalog(store, id)  WHERE canonical_ingredient IS NULL;
+CREATE INDEX IF NOT EXISTS idx_pc_unmatched      ON products_catalog(store, id)       WHERE canonical_ingredient IS NULL;
+CREATE INDEX IF NOT EXISTS idx_pc_ingredient_type ON products_catalog(ingredient_type) WHERE ingredient_type IS NOT NULL;
 
 -- ── 4. EAN cross-reference map ────────────────────────────────
 -- One product can carry multiple EANs (pack sizes, private-label
