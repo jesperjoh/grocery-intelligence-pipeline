@@ -8,7 +8,7 @@ making the raw, inconsistent product catalogues from five major Danish supermark
 chains (Bilka, Rema 1000, Føtex, Netto, Nemlig) reliably queryable by canonical
 ingredient name.
 
-Built as the price and nutrition backbone of **[Savori](https://savori.dk)** —
+Built as the price and nutrition backbone of **[Savori](https://savori.dk)** -
 a Danish meal-planning and smart-shopping app.
 
 ---
@@ -23,15 +23,15 @@ naively search for an ingredient:
 | `jordbær` (strawberry) | Strawberry yoghurt. Strawberry juice. Strawberry jam. Strawberry smoothie. Occasionally actual strawberries. |
 | `tun` (tuna) | Tuna. Tuna salad. Tuna pasta. Tuna-flavoured cat food (yes, really). |
 | `smør` (butter) | Butter. Butter-flavoured spread. Butter chicken sauce. Peanut butter. |
-| `olie` (oil) | Olive oil — plus every single product "in oil" (sardines, sun-dried tomatoes, artichokes…). |
-| `mælk` (milk) | Milk — and also oat milk, almond milk, chocolate milk, and condensed milk. |
+| `olie` (oil) | Olive oil - plus every single product "in oil" (sardines, sun-dried tomatoes, artichokes…). |
+| `mælk` (milk) | Milk - and also oat milk, almond milk, chocolate milk, and condensed milk. |
 
 Simple substring matching fails completely. Even fuzzy matching falls into the
 **brand trap**: "sukker" (sugar) matches Dansukker's entire product line, including
 syrups; "jordbær" hits every Arla Cultura flavour.
 
 A naïve auto-linker I tested early in development produced **121,000 wrong aliases**
-before a safety check caught it — including Affaldsposer (bin liners) mapped to
+before a safety check caught it - including Affaldsposer (bin liners) mapped to
 æg (eggs), and Pepsi mapped to bacon. The catalogue is that dirty.
 
 ---
@@ -45,7 +45,7 @@ The pipeline is built around three core ideas:
 Every ingredient in the system is registered in `ingredients_master` with a single,
 stable, lowercase canonical name (e.g. `"smør"`, `"kyllingebryst"`, `"mozzarella"`).
 
-Store products do **not** define the namespace — they map **into** it.
+Store products do **not** define the namespace - they map **into** it.
 Spelling variants, brand names, and recipe shorthand are normalised through
 `ingredient_aliases` before they ever touch the matching layer.
 
@@ -62,12 +62,12 @@ Products:    bilka:12345  rema:67890  foetex:11111
 The heart of the pipeline (`src/workers/match-engine.js`).
 
 Each active rule in `ingredient_match_rules` specifies:
-- An **include token** — what word or phrase must appear in the product name
-- An **exclude list** — words that immediately disqualify the match
-- A **category whitelist** — which store category labels are allowed
-- A **mode** — `word` or `phrase`
+- An **include token** - what word or phrase must appear in the product name
+- An **exclude list** - words that immediately disqualify the match
+- A **category whitelist** - which store category labels are allowed
+- A **mode** - `word` or `phrase`
 
-**Tier 1 — write directly** to `canonical_ingredient`:
+**Tier 1 - write directly** to `canonical_ingredient`:
 Token hit + at least one positive signal (local category OR ≥ 3-store taxonomy consensus)
 and none of the guards fire:
 
@@ -78,7 +78,7 @@ and none of the guards fire:
 | Prepared-product filter | Token matches "laks" but product name contains "røget" / "paneret" → demoted |
 | Compound-word guard | "jordbær" token hits "jordbæryoghurt" → `COMPOUND_WORDS` list fires → demoted |
 
-**Tier 2 — route to human review** (`ai_match_queue`):
+**Tier 2 - route to human review** (`ai_match_queue`):
 Token hit but one or more guards failed. A human approves or rejects before the
 match is ever committed. This is the **Human-in-the-Loop** gate that prevented
 the 121 k alias disaster.
@@ -98,7 +98,7 @@ This means:
 function ruleTokenMatches(name, token, mode) {
   if (mode === "phrase") { /* substring with space-collapse */ }
   const ws = ruleWords(name);
-  // Short tokens (< 4 chars) must be whole words — except "æg"
+  // Short tokens (< 4 chars) must be whole words - except "æg"
   if (token.length < 4 && token !== "æg") return ws.includes(token);
   // Longer tokens: match as whole word OR as compound suffix
   return ws.some(w => w === token || w.endsWith(token));
@@ -112,7 +112,7 @@ mejeriprodukter" in Rema. The pipeline maintains a `store_category_map` that
 translates every store's labels into a shared `taxonomy_nodes` tree.
 
 If ≥ 3 distinct stores agree that an ingredient's confirmed products land in the
-same taxonomy node, that cross-store consensus acts as a **tier-1 pass** —
+same taxonomy node, that cross-store consensus acts as a **tier-1 pass** -
 even for a store whose category label is not yet in the rule's whitelist.
 
 This makes new stores self-calibrating: the first ~10 manually verified products
@@ -229,6 +229,6 @@ than a network round-trip to an external database.
 
 ## License
 
-MIT — see [LICENSE](LICENSE) for details.
+MIT - see [LICENSE](LICENSE) for details.
 The pipeline logic is extracted from a production codebase. No real API keys,
 database credentials, or user data are present in this repository.
