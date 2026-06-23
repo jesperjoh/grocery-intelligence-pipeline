@@ -7,7 +7,7 @@
  * Problem: Danish supermarkets organise their shelves by retail logic,
  * not culinary logic. A recipe for "paprika" might mean the spice
  * (kroket, 80 g tin) or the vegetable (rød peberfrugt, 300 g). A
- * simple name search returns both — and the wrong one inflates the
+ * simple name search returns both - and the wrong one inflates the
  * estimated recipe cost by 10–15×.
  *
  * Solution: use the store's own category hierarchy as a classification
@@ -18,11 +18,11 @@
  *
  * Supported stores
  * ────────────────
- *   bilka   — category_path:  "Kolonial / Konserves, bouillon & krydderier / Krydderier"
- *   rema    — category + department from category_name / department_name fields
- *   foetex  — category + department derived from breadcrumb array
- *   netto   — same schema as Føtex (shared Salling Group backend)
- *   nemlig  — flat category label (less structured than Bilka/Føtex)
+ *   bilka   - category_path:  "Kolonial / Konserves, bouillon & krydderier / Krydderier"
+ *   rema    - category + department from category_name / department_name fields
+ *   foetex  - category + department derived from breadcrumb array
+ *   netto   - same schema as Føtex (shared Salling Group backend)
+ *   nemlig  - flat category label (less structured than Bilka/Føtex)
  *
  * Usage
  * ─────
@@ -36,16 +36,16 @@
 
 // ── Output types ──────────────────────────────────────────────────────────────
 //
-//   krydderi  — spices, dried herbs, salt, pepper, vanilla
-//   grøntsag  — vegetables (fresh, frozen, or tinned)
-//   frugt     — fruits, berries, citrus
-//   protein   — meat, poultry, fish, shellfish, eggs, legumes, tofu
-//   mejeri    — dairy: milk, cream, yoghurt, cheese, butter
-//   korn      — grains, pasta, rice, flour, bread, oats
-//   fedt      — cooking oils and pure fats
-//   nødder    — nuts, seeds, nut pastes
-//   sauce     — condiments, stocks, tinned tomatoes, jams, syrups
-//   andet     — beverages, confectionery, cleaning products, non-food
+//   krydderi  - spices, dried herbs, salt, pepper, vanilla
+//   grøntsag  - vegetables (fresh, frozen, or tinned)
+//   frugt     - fruits, berries, citrus
+//   protein   - meat, poultry, fish, shellfish, eggs, legumes, tofu
+//   mejeri    - dairy: milk, cream, yoghurt, cheese, butter
+//   korn      - grains, pasta, rice, flour, bread, oats
+//   fedt      - cooking oils and pure fats
+//   nødder    - nuts, seeds, nut pastes
+//   sauce     - condiments, stocks, tinned tomatoes, jams, syrups
+//   andet     - beverages, confectionery, cleaning products, non-food
 
 // ── Rule table ────────────────────────────────────────────────────────────────
 //
@@ -58,7 +58,7 @@
 //   • Fresh herbs live in the produce aisle → their category says "Grøntsager"
 //     but they are culinary spices. The "urter" rule fires before grøntsag.
 //   • "Nødder & Tørret Frugt" is a single category in several stores.
-//     Without a priority rule, the generic "frugt" pattern wins — wrongly.
+//     Without a priority rule, the generic "frugt" pattern wins - wrongly.
 
 const RULES = [
   // ── Priority overrides ────────────────────────────────────────────────────

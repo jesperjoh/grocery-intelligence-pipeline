@@ -5,7 +5,7 @@
  * (pieces, volume, spoons, handfuls …) into grams.
  *
  * Data source: DTU Fødevareinstituttet (Danish Technical University
- * food database) — piece weights, densities, and cooking factors
+ * food database) - piece weights, densities, and cooking factors
  * for ~800 common ingredients.
  *
  * Why this matters for price calculation:
@@ -158,7 +158,7 @@ export function getCookingFactor(ingName){ return fuzzyGet(COOKING_FACTOR, ingNa
  * impossible (e.g. "1 stk gær" with no known piece weight).
  *
  * approx = true signals that a fallback value was used (e.g. water density
- * for an unknown liquid) — the caller can show a confidence indicator.
+ * for an unknown liquid) - the caller can show a confidence indicator.
  *
  * @param {number} amount   - numeric quantity from the recipe
  * @param {string} unit     - unit string, e.g. "g", "dl", "spsk", "stk", "fed"
@@ -174,7 +174,7 @@ export function getIngredientGrams(amount, unit, ingName) {
 
   // ── Piece / no unit → DTU piece weight ────────────────────
   // Ground/powdered forms ("stødt kanel", "malet peber") are skipped
-  // because "stk" doesn't apply to powders — they should be weighed by spoon.
+  // because "stk" doesn't apply to powders - they should be weighed by spoon.
   const isGround = /stodt|malet|knust|pulver|formalet/i.test(norm(ingName ?? ""));
   if (!u || u === "stk" || u === "styk" || u === "stykker") {
     if (!isGround) {

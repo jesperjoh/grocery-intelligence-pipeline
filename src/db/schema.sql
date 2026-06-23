@@ -1,12 +1,12 @@
 -- ============================================================
--- Grocery Intelligence Pipeline — Core Schema
+-- Grocery Intelligence Pipeline - Core Schema
 -- SQLite / Cloudflare D1
 -- ============================================================
 
 -- ── 1. Canonical ingredient registry ─────────────────────────
 -- Single source of truth for every ingredient name.
 -- All store products map INTO this namespace via aliases and
--- the match engine — never the other way around.
+-- the match engine - never the other way around.
 CREATE TABLE IF NOT EXISTS ingredients_master (
   name              TEXT PRIMARY KEY,   -- canonical name, lowercase, e.g. "smør"
   normal_price      REAL,               -- reference price per unit (used in cost calc)
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS products_catalog (
   contents_unit       TEXT,
   image_url           TEXT,
   storage_temp_max    REAL,             -- °C ceiling; ≤ 5 = cold chain product
-  search_words        TEXT,             -- JSON array — store synonyms used in matching
+  search_words        TEXT,             -- JSON array - store synonyms used in matching
   canonical_ingredient TEXT,            -- FK → ingredients_master.name (set by match engine)
   updated_at          TEXT DEFAULT (datetime('now')),
 
@@ -149,7 +149,7 @@ CREATE TABLE IF NOT EXISTS ingredient_type_rules (
   updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
--- ── 9. Match engine output — auto-classification ─────────────
+-- ── 9. Match engine output - auto-classification ─────────────
 CREATE TABLE IF NOT EXISTS product_canonical_map (
   product_id    TEXT NOT NULL,          -- products_catalog.id
   canonical     TEXT NOT NULL,          -- ingredients_master.name
