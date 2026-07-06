@@ -4,12 +4,25 @@
 > running on Cloudflare Edge with zero cold-start latency.**
 
 A battle-tested data pipeline that solves one of the messiest problems in food-tech:
-making the raw, inconsistent product catalogues from five major Danish supermarket
-chains (Bilka, Rema 1000, Føtex, Netto, Nemlig) reliably queryable by canonical
-ingredient name.
+making the raw, inconsistent product catalogues from Danish supermarket chains -
+five deeply integrated catalogue APIs (Bilka, Rema 1000, Føtex, Netto, Nemlig) plus
+offer-catalogue feeds from nine more - reliably queryable by canonical ingredient name.
 
 Built as the price and nutrition backbone of **[Savori](https://savori.dk)** -
 a Danish meal-planning and smart-shopping app.
+
+## Production Scale (July 2026)
+
+| Metric | Value |
+|---|---|
+| Products in catalogue | 46,000+ across 14 retail data sources |
+| Historical price points | 323,000+ (daily sync since May 2026) |
+| Recipes priced end-to-end | 7,800+ with cost, nutrition and CO2e per serving |
+| Ingredient → product resolution | ~90 % of ingredient rows in production recipes resolve to a purchasable product (usage-weighted - measured on actual recipe usage, not on the prettiest subset) |
+| Downstream layers | CONCITO climate footprints, DTU Frida nutrition, culinary substitution graph |
+
+Everything runs serverless: the same Cloudflare account hosts the pipeline crons,
+the database, the vector indexes and the consumer-facing API.
 
 ---
 
@@ -204,6 +217,30 @@ than a network round-trip to an external database.
 
 ---
 
+## Measured Quality: The Golden Benchmark
+
+Every change to the matching layer - new rules, alias cleanups, engine tweaks -
+must pass a hand-labelled benchmark before it ships:
+
+- **602 hand-labelled ingredient-product pairs**, each classified as
+  `match` / `no_match` / `substitute`, with an explicit **trap type** recorded for
+  the hard cases (brand traps, prepared-product traps, compound-word traps,
+  category errors, cross-store EAN errors).
+- The benchmark acts as a **precision gate**: a change that lifts recall but drops
+  precision is rejected. Baseline for the full engine: precision 0.81 / recall 0.92;
+  the deterministic rule tier alone runs at precision 0.84 with deliberately
+  conservative recall (ambiguity goes to the human queue instead).
+- New failure classes discovered in production are added to the benchmark as traps,
+  so the same mistake cannot ship twice. The benchmark has already caught one of my
+  own "obviously safe" bulk fills before it reached production - which is exactly
+  the point.
+
+The principle behind it: **similarity may rank candidates, but only evidence of
+identity may decide.** Embedding scores and token overlap are used to order the
+review queue - never to write a match on their own.
+
+---
+
 ## Lessons Learned
 
 1. **Substring matching is a trap.** Always use word-boundary semantics for ingredient
@@ -224,6 +261,10 @@ than a network round-trip to an external database.
 5. **Never write bulk matches without a human gate.** The 121 k alias incident happened
    when a token-similarity score was used as a direct write signal. The Human-in-the-Loop
    queue exists specifically to prevent this class of error.
+
+6. **You cannot safely refactor what you do not measure.** The golden benchmark turned
+   "I think this rule change is safe" into a number. Every shortcut it has blocked
+   would have been invisible until users saw wrong prices.
 
 ---
 
