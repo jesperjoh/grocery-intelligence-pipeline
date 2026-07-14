@@ -110,7 +110,7 @@ const DENSITY = {
   "rugmel":       { gDl:  55, gSpsk:  8, gTsk: 3 },
   "havregryn":    { gDl:  40, gSpsk:  6, gTsk: 2 },
   "olie":         { gDl:  92, gSpsk: 14, gTsk: 5 },
-  "smaer":        { gDl: 911, gSpsk: 14, gTsk: 5 }, // density of butter
+  "smoer":        { gDl:  91, gSpsk: 14, gTsk: 5 }, // butter ≈ 0.911 g/ml
 };
 
 // ── Cooking / hydration factors ────────────────────────────────────────────────
@@ -119,11 +119,12 @@ const DENSITY = {
 const COOKING_FACTOR = {
   "ris":       2.5,
   "pasta":     2.5,
-  "spagetti":  3.0,
+  "spaghetti": 3.0,
+  "spagetti":  3.0,   // common Danish recipe spelling
   "linser":    2.5,
-  "kikarter":  2.1,
-  "bonner":    2.4,
-  "aarter":    2.1,
+  "kikaerter": 2.1,
+  "boenner":   2.4,
+  "aerter":    2.1,
 };
 
 // ── Fuzzy lookup ──────────────────────────────────────────────────────────────

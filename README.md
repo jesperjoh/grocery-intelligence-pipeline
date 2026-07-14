@@ -5,8 +5,12 @@
 
 A battle-tested data pipeline that solves one of the messiest problems in food-tech:
 making the raw, inconsistent product catalogues from Danish supermarket chains -
-five deeply integrated catalogue APIs (Bilka, Rema 1000, Føtex, Netto, Nemlig) plus
-offer-catalogue feeds from nine more - reliably queryable by canonical ingredient name.
+catalogue integrations built for five chains (Bilka, Rema 1000, Føtex, Netto, Nemlig)
+plus offer-catalogue feeds from nine more - reliably queryable by canonical ingredient
+name. As of July 2026 the live daily price syncs focus on Bilka and Rema 1000; the
+remaining catalogues are preserved as a historical archive. The architecture is
+BYOD-first: any catalogue owner can feed their own product data through the same
+ingestion path.
 
 Built as the price and nutrition backbone of **[Savori](https://savori.dk)** -
 a Danish meal-planning and smart-shopping app.
@@ -16,7 +20,7 @@ a Danish meal-planning and smart-shopping app.
 | Metric | Value |
 |---|---|
 | Products in catalogue | 46,000+ across 14 retail data sources |
-| Historical price points | 323,000+ (daily sync since May 2026) |
+| Historical price points | 323,000+ (collected since May 2026; live daily sync now Bilka + Rema 1000) |
 | Recipes priced end-to-end | 7,800+ with cost, nutrition and CO2e per serving |
 | Ingredient → product resolution | ~90 % of ingredient rows in production recipes resolve to a purchasable product (usage-weighted - measured on actual recipe usage, not on the prettiest subset) |
 | Downstream layers | CONCITO climate footprints, DTU Frida nutrition, culinary substitution graph |
@@ -268,8 +272,18 @@ review queue - never to write a match on their own.
 
 ---
 
-## License
+## License & Data Attribution
 
-MIT - see [LICENSE](LICENSE) for details.
+**Code:** MIT - see [LICENSE](LICENSE) for details.
 The pipeline logic is extracted from a production codebase. No real API keys,
 database credentials, or user data are present in this repository.
+
+**Embedded reference data:** the MIT license covers the code only. The density,
+piece-weight, and cooking-factor values in `src/utils/unit-conversion.js` are
+derived from **Frida** (fooddata.dk), the food database published by the National
+Food Institute, Technical University of Denmark (DTU Fødevareinstituttet), and are
+used under Frida's own terms - they are not relicensed by this repository.
+Values marked as manually curated come from physical weighing or supplier spec
+sheets. The production system additionally links to **CONCITO's Den Store
+Klimadatabase** for CO2e footprints (referenced by ID only; no CONCITO data is
+included here).
