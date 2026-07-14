@@ -15,6 +15,44 @@ ingestion path.
 Built as the price and nutrition backbone of **[Savori](https://savori.dk)** -
 a Danish meal-planning and smart-shopping app.
 
+## TL;DR (the 2-minute version)
+
+- **The problem:** supermarket catalogues are structurally noisy - searching "strawberry"
+  returns yoghurt, jam and smoothies ([The Yoghurt Trap](#the-problem-the-yoghurt-trap-and-friends))
+- **The approach:** a deterministic two-tier match engine with quality gates and a
+  Human-in-the-Loop review queue. AI is a tool in the solution, not the solution -
+  it ranks and explains; only evidence writes ([Architecture](#the-architecture))
+- **The quality bar:** every change to the matching layer must pass a 600+ case
+  hand-labelled benchmark before it ships - precision 0.81 / recall 0.92
+  ([Golden Benchmark](#measured-quality-the-golden-benchmark))
+- **Self-auditing:** the system logs where it lacks knowledge and writes a prioritized
+  shopping list for data collection
+  ([Self-Auditing Knowledge](#self-auditing-knowledge-the-data-shopping-list))
+- **Battle-tested:** the safeguards exist because a naive auto-linker once produced
+  121,000 wrong aliases ([Lessons Learned](#lessons-learned))
+
+### The pipeline at a glance
+
+```mermaid
+flowchart LR
+    subgraph sources [Data in]
+        F["Catalogue feeds<br/>5 chains + offers"]
+        R["Recipes<br/>7,800+"]
+    end
+    F --> N["Normalise + import<br/>products_catalog"]
+    R --> P["Parse ingredient lines"]
+    P --> C["Canonical ingredient namespace<br/>+ alias bridge"]
+    N --> M{"Match engine<br/>rules + guards"}
+    C --> M
+    M -->|"tier 1: evidence"| W["Auto-write<br/>canonical link"]
+    M -->|"tier 2: doubt"| H["Human review<br/>queue"]
+    H --> W
+    W --> E["Enrichment layer<br/>LLM + DTU Frida + CONCITO"]
+    E --> O["Price / nutrition / CO2e per serving<br/>substitutions + gap report"]
+    B["Golden benchmark<br/>gates every change"] -.-> M
+    D["Watchdog<br/>freshness + failure alerts"] -.-> N
+```
+
 ## Production Scale (July 2026)
 
 | Metric | Value |
@@ -24,6 +62,16 @@ a Danish meal-planning and smart-shopping app.
 | Recipes priced end-to-end | 7,800+ with cost, nutrition and CO2e per serving |
 | Ingredient → product resolution | ~90 % of ingredient rows in production recipes resolve to a purchasable product (usage-weighted - measured on actual recipe usage, not on the prettiest subset) |
 | Downstream layers | CONCITO climate footprints, DTU Frida nutrition, culinary substitution graph |
+
+**How these numbers are measured** (figures as of July 2026):
+
+| Number | How it is counted |
+|---|---|
+| 46,000+ products | Row count of the unified product catalogue table, across 14 source feeds |
+| 323,000+ price points | Rows in the price history table, appended by the daily syncs since May 2026 |
+| 7,800+ recipes priced | Recipes with a computed cost, nutrition and CO2e per serving |
+| ~90 % resolution | **Usage-weighted**: share of ingredient *rows* in production recipes that resolve to a purchasable product. Measured on occurrences, not distinct names - deliberately the less flattering metric (a rare exotic spice failing counts less than butter failing) |
+| precision 0.81 / recall 0.92 | The full engine against the 600+ pair hand-labelled benchmark ([methodology below](#measured-quality-the-golden-benchmark)) |
 
 Everything runs serverless: the same Cloudflare account hosts the pipeline crons,
 the database, the vector indexes and the consumer-facing API.
