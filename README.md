@@ -245,6 +245,39 @@ review queue - never to write a match on their own.
 
 ---
 
+## Self-Auditing Knowledge: the Data Shopping List
+
+Measuring quality tells you where the system is wrong. The next step is making the
+system tell you **where it is blind** - before a user finds out.
+
+**In production today:** every ingredient that fails to resolve to a purchasable
+product is logged and aggregated (which ingredients, how often, whether a substitute
+saved the situation). The result is a live "assortment gap" report: a ranked list of
+exactly which missing data hurts real usage the most.
+
+**Design direction - gap detection on the knowledge graph:** the ingredient graph
+(co-occurrence edges from the recipe corpus + AI-derived pairing edges) shows what
+belongs together. But the structure also shows what is *missing*:
+
+- High-usage ingredients with few edges or thin enrichment (the most expensive holes)
+- Disagreement between the statistical layer and the understanding layer, in both
+  directions (strong co-occurrence with no pairing knowledge = enrichment gap;
+  pairing knowledge with no statistical support = possible hallucination, send to review)
+- Structural holes: if every citrus fruit pairs with fish except one, the missing
+  edge is probably a data gap, not a fact
+- Isolated nodes with no community context
+- Dish-type clusters too small to carry statistics
+
+Each gap is priced by expected utility (usage frequency x how much is missing) and
+mapped to its cheapest fix: three targeted recipe imports, one enrichment run, one
+barcode lookup. The output is a prioritized **shopping list for data collection**.
+
+Why it matters: filling a gap proactively with three recipes beats waiting for a
+user to hit the error, and beats writing four new hand rules that never generalize.
+Reactive fixes cost trust; hand rules cost maintenance; targeted evidence compounds.
+
+---
+
 ## Lessons Learned
 
 1. **Substring matching is a trap.** Always use word-boundary semantics for ingredient
@@ -269,6 +302,11 @@ review queue - never to write a match on their own.
 6. **You cannot safely refactor what you do not measure.** The golden benchmark turned
    "I think this rule change is safe" into a number. Every shortcut it has blocked
    would have been invisible until users saw wrong prices.
+
+7. **The cheapest fix is the one made before the error.** Three targeted recipe
+   imports that strengthen a weak corner of the knowledge graph beat a user-reported
+   bug (trust already lost) and beat four new hand rules (maintenance debt that never
+   generalizes). Let the system write its own data shopping list.
 
 ---
 
