@@ -38,7 +38,10 @@ function ruleWords(s) {
  *   NOT match "tunsalat" (which is a prepared dish, not raw tuna).
  *   Short tokens (< 4 chars) are only matched as whole words, with one
  *   deliberate exception: "æg" (egg) is a genuine compound head and must
- *   match "skrabeæg", "frilandsæg", "æggehvide", etc.
+ *   match "skrabeæg", "frilandsæg", etc. It must NOT match "æggehvide" or
+ *   "æggeblomme" - there "æg" is the leading part, not the head noun, and
+ *   egg white/yolk are distinct canonical ingredients with their own match
+ *   rules. The relationship is captured as a substitution, not an identity.
  *
  * mode = "phrase"
  *   Case-insensitive substring; also checks the compacted form (no spaces)
