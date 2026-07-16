@@ -156,7 +156,12 @@ Danish is an agglutinative language. Nouns compound freely:
 This means:
 - `ketchup` should match `tomatketchup` ✓
 - `tun` should NOT match `tunsalat` ✗ (that's a prepared dish)
-- `æg` should match `skrabeæg`, `frilandsæg`, `æggehvide` ✓
+- `æg` should match `skrabeæg`, `frilandsæg` ✓ (egg is the head noun, at the end)
+- `æg` should NOT match `æggehvide` or `æggeblomme` ✗ - here `æg` is the *first*
+  part of the compound, and the head noun (`hvide`, `blomme`) is last. Egg white
+  is not egg, the same way `tunsalat` is not tuna: it's a related but distinct
+  product with its own canonical identity, own catalogue entries, and its own
+  match rule.
 
 ```js
 // From src/workers/match-engine.js
@@ -169,6 +174,14 @@ function ruleTokenMatches(name, token, mode) {
   return ws.some(w => w === token || w.endsWith(token));
 }
 ```
+
+The identity boundary isn't the end of the relationship, though - a whole egg
+*does* contain both white and yolk. That fact belongs in `ingredient_substitutions`,
+not in the match rule: `æggehvide → æg` and `æggeblomme → æg` are recorded as
+substitutes, so a shopping list can still fall back to "buy a whole egg" when no
+dedicated egg-white or egg-yolk product is in stock. Identity and substitutability
+are different questions, and conflating them is exactly the kind of shortcut that
+produced the 121k alias incident.
 
 ### 4. Cross-Store Taxonomy Voting
 
