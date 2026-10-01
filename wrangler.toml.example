@@ -34,12 +34,15 @@ index_name = "product-index"
 # SALLING_STORE_ID    – Store ID for Bilka
 # FOETEX_STORE_ID     – Store ID for Føtex
 # NETTO_STORE_ID      – Store ID for Netto
-# ANTHROPIC_API_KEY   – Claude API for AI-assisted matching and review
+# CF_AI_GATEWAY_TOKEN – Cloudflare AI Gateway: when set, all model calls
+#                       (Anthropic + Google) are routed through the gateway
+# ANTHROPIC_API_KEY   – Direct Claude API fallback when no gateway token is set
 
 # ── Scheduled triggers ────────────────────────────────────────
 [triggers]
 crons = [
-  "0 6 * * *",   # Daily 06:00 UTC — price sync, catalogue import, match-rule run
+  "*/20 6-7 * * *", # Daily chain 06:00–07:40 UTC, six 20-min stages: offers,
+                    # price syncs, derived data, catalogue, enrichment, watchdog + match rules
   "0 5 1 * *",   # Monthly 1st 05:00 UTC — EAN harmonisation across stores
 ]
 
